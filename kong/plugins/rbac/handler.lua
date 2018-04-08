@@ -127,7 +127,7 @@ local function do_authentication(conf)
   local cache = singletons.cache
   local dao = singletons.dao
 
-  local credential_cache_key = dao.keyauth_credentials:cache_key(key)
+  local credential_cache_key = dao.rbac_credentials:cache_key(key)
   local credential, err = cache:get(credential_cache_key, nil,
     load_credential, key)
   if err then
