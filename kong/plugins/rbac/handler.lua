@@ -122,8 +122,6 @@ local function do_authentication(conf)
     return false, { status = 401, message = "No API key found in request" }
   end
 
-  -- retrieve our consumer linked to this API key
-
   local cache = singletons.cache
   local dao = singletons.dao
 
@@ -136,6 +134,11 @@ local function do_authentication(conf)
 
   -- no credential in DB, for this key, it is invalid, HTTP 403
   if not credential then
+    return false, { status = 403, message = "Invalid authentication credentials" }
+  end
+
+  -- credential expired.
+  if credential.expired_at and credential.expired_at <= (os.time() * 1000) then
     return false, { status = 403, message = "Invalid authentication credentials" }
   end
 
