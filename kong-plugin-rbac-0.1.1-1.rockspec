@@ -13,7 +13,7 @@ supported_platforms = {"linux", "macosx"}
 source = {
   -- these are initially not required to make it work
   url = "git://github.com/mr5/kong-rbac",
-  tag = "0.1.0"
+  tag = "0.1.1"
 }
 
 description = {
