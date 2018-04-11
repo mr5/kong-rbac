@@ -49,7 +49,7 @@ local ROLE_CONSUMER_SCHEMA = {
   }
 }
 
-local CREDENTZIAL_SCHEMA = {
+local CREDENTIAL_SCHEMA = {
   primary_key = { "id" },
   table = "rbac_credentials",
   cache_key = { "key" },
@@ -67,5 +67,5 @@ return {
   rbac_roles = ROLE_SCHEMA,
   rbac_role_resources = ROLE_RESOURCE_SCHEMA,
   rbac_role_consumers = ROLE_CONSUMER_SCHEMA,
-  rbac_credentials = CREDENTZIAL_SCHEMA
+  rbac_credentials = CREDENTIAL_SCHEMA
 }

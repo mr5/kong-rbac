@@ -144,6 +144,28 @@ return {
   ["/rbac/credentials"] = {
     GET = function(self, dao_factory)
       crud.paginated_set(self, dao_factory.rbac_credentials)
+    end,
+
+    POST = function(self, dao_factory, helpers)
+      if not self.params.consumer_id then
+        if self.params.custom_id or self.params.username then
+          local filter = {}
+          filter[self.params.custom_id and 'custom_id' or 'username'] = self.params.custom_id and self.params.custom_id or self.params.username
+          local consumer
+          local consumers, err = dao_factory.consumers:find_all(filter)
+          if err then
+            return helpers.responses.send_HTTP_BAD_REQUEST(err.message)
+          elseif next(consumers) == nil then
+            consumer = dao_factory.consumers:insert({ custom_id = self.params.custom_id, username = self.params.username })
+          else
+            consumer = consumers[1]
+          end
+          self.params.consumer_id = consumer.id
+        end
+      end
+      self.params.username = nil
+      self.params.custom_id = nil
+      crud.post(self.params, dao_factory.rbac_credentials)
     end
   },
   ["/rbac/credentials/:credential_key_or_id"] = {

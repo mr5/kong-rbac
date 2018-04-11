@@ -7,18 +7,18 @@ version = "0.1.0-1"               -- TODO: renumber, must match the info in the 
 
 -- TODO: This is the name to set in the Kong configuration `custom_plugins` setting.
 -- Here we extract it from the package name.
-local pluginName = package:match("^kong%-plugin%-(.+)$")  -- "myPlugin"
+local pluginName = package:match("^kong%-plugin%-(.+)$")  -- "kong-rbac"
 
 supported_platforms = {"linux", "macosx"}
 source = {
   -- these are initially not required to make it work
-  url = "git://github.com/Mashape/kong_plugin",
+  url = "git://github.com/mr5/kong-rbac",
   tag = "0.1.0"
 }
 
 description = {
-  summary = "Kong is a scalable and customizable API Management Layer built on top of Nginx.",
-  homepage = "http://getkong.org",
+  summary = "Kong-rbac is a rbac plugin for Kong",
+  homepage = "https://github.com/mr5/kong-rbac",
   license = "MIT"
 }
 

@@ -58,7 +58,7 @@ return {
         IF (SELECT to_regclass('rbac_key_idx')) IS NULL THEN
           CREATE INDEX rbac_key_idx ON rbac_credentials(key);
         END IF;
-        IF (SELECT to_regclass('keyauth_consumer_idx')) IS NULL THEN
+        IF (SELECT to_regclass('rbac_consumer_idx')) IS NULL THEN
           CREATE INDEX rbac_consumer_idx ON rbac_credentials(consumer_id);
         END IF;
       END$$;
