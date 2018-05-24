@@ -49,6 +49,7 @@ return {
       crud.post(self.params, dao_factory.rbac_roles)
     end
   },
+
   ["/rbac/roles/:role_name_or_id/resources"] = {
     before = function(self, dao_factory, helpers)
       local roles, err = crud.find_by_id_or_field(
@@ -72,9 +73,11 @@ return {
     GET = function(self, dao_factory)
       crud.paginated_set(self, dao_factory.rbac_role_resources)
     end,
+
     POST = function(self, dao_factory)
       crud.post(self.params, dao_factory.rbac_role_resources)
     end,
+
     DELETE = function(self, dao_factory, helpers)
       local role_resources = dao_factory.rbac_role_resources:find_all(self.params)
       if table.getn(role_resources) <= 0 then
@@ -85,6 +88,7 @@ return {
       end
     end
   },
+
   ["/rbac/role/:role_name_or_id/consumers"] = {
     before = function(self, dao_factory, helpers)
       local roles, err = crud.find_by_id_or_field(
@@ -115,7 +119,7 @@ return {
     DELETE = function(self, dao_factory)
       local role_consumers = dao_factory.rbac_role_consumers:find_all(self.params)
       --local primary_keys = {}
-      if table.getn(role_consumers) >= 0 then
+      if table.getn(role_consumers) <= 0 then
         return helpers.responses.send_HTTP_NOT_FOUND("No consumers found.")
       end
       for i = 1, #role_consumers do
@@ -123,6 +127,7 @@ return {
       end
     end
   },
+
   ["/consumers/:username_or_id/rbac-credentials/"] = {
     before = function(self, dao_factory, helpers)
       crud.find_consumer_by_username_or_id(self, dao_factory, helpers)
@@ -141,6 +146,7 @@ return {
       crud.post(self.params, dao_factory.rbac_credentials)
     end
   },
+
   ["/rbac/credentials"] = {
     GET = function(self, dao_factory)
       crud.paginated_set(self, dao_factory.rbac_credentials)
@@ -168,6 +174,7 @@ return {
       crud.post(self.params, dao_factory.rbac_credentials)
     end
   },
+
   ["/rbac/credentials/:credential_key_or_id"] = {
     before = function(self, dao_factory, helpers)
       local credentials, err = crud.find_by_id_or_field(
@@ -196,6 +203,7 @@ return {
       crud.delete(self.credential, dao_factory.rbac_credentials)
     end
   },
+
   ["/rbac/credentials/:credential_key_or_id/consumer"] = {
     before = function(self, dao_factory, helpers)
       local credentials, err = crud.find_by_id_or_field(

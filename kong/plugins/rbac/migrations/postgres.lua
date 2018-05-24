@@ -1,6 +1,6 @@
 return {
   {
-    name = "2018-04-03-171841_init_rbac",
+    name = "2018-05-22-182330_init_rbac",
     up = [[
       CREATE TABLE IF NOT EXISTS rbac_resources (
         "id" uuid PRIMARY KEY,
@@ -42,7 +42,7 @@ return {
     ]]
   },
   {
-    name = "2018-04-08-113926_rbac_credentials",
+    name = "2018-05-22-182310_rbac_credentials",
     up = [[
       CREATE TABLE IF NOT EXISTS rbac_credentials(
         id uuid,
