@@ -1,7 +1,9 @@
 local responses = require "kong.tools.responses"
 local constants = require "kong.constants"
 local singletons = require "kong.singletons"
+local router = require "kong.plugins.rbac.router"
 
+local routers = router.new()
 local ngx_set_header = ngx.req.set_header
 
 local _realm = 'Key realm="RBAC"'
@@ -122,8 +124,8 @@ function _M.execute(key)
   if err then
     return false, {status = 403, message = "Forbidden"}
   end
-
-  local pathMap = {}
+  
+  local params = ngx.req.get_uri_args()
   for i, v in ipairs(role_consumer) do
     local role_resources_key = dao.rbac_role_resources:cache_key(v)
     local role_resources, err = cache:get(role_resources_key, nil, load_roles_resources, v)
@@ -133,19 +135,23 @@ function _M.execute(key)
         local resources, err = cache:get(resources_key, nil, load_resources, val)
         if resources and err == nil then
           for key, value in ipairs(resources) do
-            pathMap[value.upstream_path] = true
+            routers:match(value.method, value.upstream_path, function(params)
+              return params
+            end)
           end
         end
       end
     end
   end
 
-  if pathMap and next(pathMap) == nil then
-    return false, {status = 403, message = "Forbidden"}
-  end
+  local ok, errmsg = routers:execute(
+        ngx.var.request_method,
+        ngx.var.uri,
+        ngx.req.get_uri_args(),
+        ngx.req.read_body())
 
-  local path = ngx.var.uri
-  if not pathMap[path] then
+  
+  if not ok then
     return false, {status = 403, message = "Forbidden"}
   end
 
