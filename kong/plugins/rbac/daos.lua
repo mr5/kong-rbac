@@ -6,7 +6,7 @@ local RESOURCE_SCHEMA = {
   cache_key = { "api_id", "method", "upstream_path" },
   fields = {
     id = { type = "id", dao_insert_value = true },
-    api_id = { type = "uuid", required = true, foreign = "apis:id" },
+    api_id = { type = "id", required = true, foreign = "apis:id" },
     method = { type = "string", required = true },
     upstream_path = { type = "string", required = true },
     description = { type = "string", required = true },
@@ -33,8 +33,8 @@ local ROLE_RESOURCE_SCHEMA = {
   cache_key = { "role_id" },
   fields = {
     id = { type = "id", dao_insert_value = true },
-    role_id = { type = "string", required = true, foreign = "rbac_roles:id" },
-    resource_id = { type = "string", required = true, foreign = "rbac_resources:id" }
+    role_id = { type = "id", required = true, foreign = "rbac_roles:id" },
+    resource_id = { type = "id", required = true, foreign = "rbac_resources:id" }
   }
 }
 
@@ -44,8 +44,8 @@ local ROLE_CONSUMER_SCHEMA = {
   cache_key = { "consumer_id" },
   fields = {
     id = { type = "id", dao_insert_value = true },
-    role_id = { type = "string", required = true, foreign = "rbac_roles:id" },
-    consumer_id = { type = "string", required = true, foreign = "consumers:id" }
+    role_id = { type = "id", required = true, foreign = "rbac_roles:id" },
+    consumer_id = { type = "id", required = true, foreign = "consumers:id" }
   }
 }
 

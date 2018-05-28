@@ -11,36 +11,33 @@ return {
     name = "2018-05-22-101000_init_rbac",
     up = [[
       CREATE TABLE IF NOT EXISTS rbac_resources (
-        "id" uuid,
-        "api_id" uuid,
-        "method" text,
-        "upstream_path" text,
-        "description" text,
+        id uuid,
+        api_id uuid,
+        method text,
+        upstream_path text,
+        description text,
         visibility text,
         created_at timestamp,
         PRIMARY KEY (id)
       );
-    ],
-    [
+
       CREATE TABLE IF NOT EXISTS rbac_roles (
-        "id" uuid,
-        "name" text,
-        "description" text,
+        id uuid,
+        name text,
+        description text,
         created_at timestamp,
         PRIMARY KEY (id)
       );
-    ],
-    [
+
       CREATE TABLE IF NOT EXISTS rbac_role_resources (
-        "id" uuid,
+        id uuid,
         role_id uuid,
         resource_id uuid,
         PRIMARY KEY (role_id, resource_id)
       );
-    ],
-    [
+
       CREATE TABLE IF NOT EXISTS rbac_role_consumers (
-        "id" uuid,
+        id uuid,
         consumer_id uuid,
         role_id uuid,
         PRIMARY KEY (consumer_id, role_id)

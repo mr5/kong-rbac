@@ -14,7 +14,6 @@ return {
     --end,
 
     GET = function(self, dao_factory)
-      --return 'hello world'
       crud.paginated_set(self, dao_factory.rbac_resources)
     end,
 
