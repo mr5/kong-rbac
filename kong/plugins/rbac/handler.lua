@@ -32,6 +32,11 @@ local function do_authentication(conf)
     return false, {status = 500, message = "Invalid plugin configuration"}
   end
 
+  local ok, err = access.IgnoreAeecss()
+  if ok then
+    return ok
+  end
+
   local key
   local headers = ngx_get_headers()
   local uri_args = get_uri_args()
@@ -85,7 +90,7 @@ local function do_authentication(conf)
     return false, {status = 401, message = "No API key found in request"}
   end
 
-  return access.execute(key)
+  return access.execute(key, conf.key_expired)
 end
 
 function RBACAuthHandler:access(conf)

@@ -18,12 +18,12 @@ local RESOURCE_SCHEMA = {
 local ROLE_SCHEMA = {
   primary_key = { "id" },
   table = "rbac_roles",
-  cache_key = { "id" },
+  cache_key = { "id", "name" },
   fields = {
     id = { type = "id", dao_insert_value = true },
     name = { type = "string", required = true, unique = true },
     description = { type = "string", required = false },
-    created_at = { type = "timestamp", dao_insert_value = true }
+    created_at = { type = "timestamp", immutable = true, dao_insert_value = true }
   }
 }
 
@@ -41,7 +41,7 @@ local ROLE_RESOURCE_SCHEMA = {
 local ROLE_CONSUMER_SCHEMA = {
   primary_key = { "id" },
   table = "rbac_role_consumers",
-  cache_key = { "consumer_id" },
+  cache_key = { "role_id" },
   fields = {
     id = { type = "id", dao_insert_value = true },
     role_id = { type = "id", required = true, foreign = "rbac_roles:id" },

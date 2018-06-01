@@ -4,6 +4,7 @@ local singletons = require "kong.singletons"
 local router = require "kong.plugins.rbac.router"
 
 local routers = router.new()
+local ignore_router = router.new()
 local ngx_set_header = ngx.req.set_header
 
 local _realm = 'Key realm="RBAC"'
@@ -92,7 +93,24 @@ local function load_resources(resources_id)
   return result
 end
 
-function _M.execute(key)
+local function update_key_expired(credential, expired)
+  credential.expired_at = (os.time() * 1000) + (expired * 1000)
+  singletons.dao.rbac_credentials:update(credential, credential, {full = true})
+end
+
+local function load_public_resource(visibility)
+  local result, err = singletons.dao.rbac_resources:find_all {
+    visibility = visibility
+  }
+
+  if err or not result then
+    return nil, err
+  end
+
+  return result
+end
+
+function _M.execute(key, expired)
   local cache = singletons.cache
   local dao = singletons.dao
 
@@ -125,15 +143,15 @@ function _M.execute(key)
     return false, {status = 403, message = "Forbidden"}
   end
   
-  local params = ngx.req.get_uri_args()
+  -- local params = ngx.req.get_uri_args()
   for i, v in ipairs(role_consumer) do
     local role_resources_key = dao.rbac_role_resources:cache_key(v)
     local role_resources, err = cache:get(role_resources_key, nil, load_roles_resources, v)
-    if role_resources and err == nil then
+    if err == nil and next(role_resources) ~= nil then
       for k, val in ipairs(role_resources) do
         local resources_key = dao.rbac_resources:cache_key(val)
         local resources, err = cache:get(resources_key, nil, load_resources, val)
-        if resources and err == nil then
+        if err == nil and next(resources) ~= nil then
           for key, value in ipairs(resources) do
             routers:match(value.method, value.upstream_path, function(params)
               return params
@@ -162,8 +180,33 @@ function _M.execute(key)
   end
 
   set_consumer(consumer, credential)
-
+  update_key_expired(credential, expired)
   return true
+end
+
+function _M.IgnoreAeecss()
+  local visibility = "public"
+  local resource_key = singletons.dao.rbac_resources:cache_key(visibility)
+  local resource, err = singletons.cache:get(resource_key, nil, load_public_resource, visibility)
+  if not err and next(resource) ~= nil then
+    for k, v in ipairs(resource) do
+      ignore_router:match(v.method, v.upstream_path, function(params)
+        return params
+      end)
+    end
+
+    local ok, errmsg = ignore_router:execute(
+      ngx.var.request_method,
+      ngx.var.uri,
+      ngx.req.get_uri_args(),
+      ngx.req.read_body())
+
+    if ok then
+      return true
+    end
+
+    return false, errmsg
+  end
 end
 
 function _M.anonymous(anonymous)

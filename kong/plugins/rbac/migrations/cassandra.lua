@@ -33,14 +33,14 @@ return {
         id uuid,
         role_id uuid,
         resource_id uuid,
-        PRIMARY KEY (role_id, resource_id)
+        PRIMARY KEY (id, role_id, resource_id)
       );
 
       CREATE TABLE IF NOT EXISTS rbac_role_consumers (
         id uuid,
         consumer_id uuid,
         role_id uuid,
-        PRIMARY KEY (consumer_id, role_id)
+        PRIMARY KEY (id, consumer_id, role_id)
       );
     ]],
     down = [[
