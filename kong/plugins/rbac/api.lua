@@ -23,6 +23,7 @@ return {
     end,
 
     POST = function(self, dao_factory)
+      -- dao_factory.rbac_resources:update(self.params)
       crud.post(self.params, dao_factory.rbac_resources)
     end,
 

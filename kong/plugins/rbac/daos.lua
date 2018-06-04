@@ -6,7 +6,7 @@ local RESOURCE_SCHEMA = {
   cache_key = { "api_id", "method", "upstream_path" },
   fields = {
     id = { type = "id", dao_insert_value = true },
-    api_id = { type = "id", required = true, foreign = "apis:id" },
+    api_id = { type = "id", required = true },
     method = { type = "string", required = true },
     upstream_path = { type = "string", required = true },
     description = { type = "string", required = true },
