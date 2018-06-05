@@ -28,7 +28,6 @@ end
 
 local function do_authentication(conf)
   if type(conf.key_names) ~= "table" then
-    ngx.log(ngx.ERR, "[rbac] no conf.key_names set, aborting plugin execution")
     return false, {status = 500, message = "Invalid plugin configuration"}
   end
 
