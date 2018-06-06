@@ -23,6 +23,8 @@ description = {
 }
 
 dependencies = {
+  "router == 2.1-0",
+  "lodash == 0.02-0"
 }
 
 build = {
