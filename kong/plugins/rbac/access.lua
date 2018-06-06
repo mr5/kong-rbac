@@ -123,8 +123,6 @@ function _M.execute(key, expired)
     return responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
   end
 
-  ngx.print(credential.consumer_id)
-
   -- no credential in DB, for this key, it is invalid, HTTP 403
   if not credential then
     return false, {status = 403, message = "Invalid authentication credentials"}
@@ -143,7 +141,6 @@ function _M.execute(key, expired)
 
   -- get role id by consumer id
   local role_consumer_key = dao.rbac_role_consumers:cache_key(credential.consumer_id)
-  ngx.print(credential.consumer_id)
   local role_consumer, err = cache:get(role_consumer_key, nil, load_role_consumer, credential.consumer_id)
   if err then
     return false, {status = 403, message = "Forbidden"}
@@ -159,7 +156,6 @@ function _M.execute(key, expired)
         local resources, err = cache:get(resources_key, nil, load_resources, val)
         if err == nil and next(resources) ~= nil then
           for key, value in ipairs(resources) do
-            ngx.print(value.method, value.upstream_path)
             routers:match(value.method, value.upstream_path, function(params)
               return params
             end)

@@ -28,7 +28,7 @@ local ROLE_SCHEMA = {
 }
 
 local ROLE_RESOURCE_SCHEMA = {
-  primary_key = { "id" },
+  primary_key = { "id", "role_id", "resource_id" },
   table = "rbac_role_resources",
   cache_key = { "role_id" },
   fields = {
@@ -39,7 +39,7 @@ local ROLE_RESOURCE_SCHEMA = {
 }
 
 local ROLE_CONSUMER_SCHEMA = {
-  primary_key = { "id" },
+  primary_key = { "id", "role_id", "consumer_id" },
   table = "rbac_role_consumers",
   cache_key = { "role_id" },
   fields = {
