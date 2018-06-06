@@ -116,7 +116,7 @@ return {
       for i = 1, #role_resources do
         dao_factory.rbac_role_resources:delete(role_resources[i]);
       end
-      return helpers.responses.send_HTTP_OK('All resource associations of role ' .. self.role_name_or_id .. ' has been removed.')
+      return helpers.responses.send_HTTP_OK(table.getn(role_resources) .. ' resource associations of role ' .. self.role_name_or_id .. ' has been removed.')
     end
   },
   ["/rbac/roles/:role_name_or_id/consumers"] = {
@@ -161,7 +161,7 @@ return {
       for i = 1, #role_consumers do
         dao_factory.rbac_role_consumers:delete(role_consumers[i]);
       end
-      return helpers.responses.send_HTTP_OK('All consumer associations of role ' .. self.role_name_or_id .. ' has been removed.')
+      return helpers.responses.send_HTTP_OK(table.getn(role_consumers) .. ' consumer associations of role ' .. self.role_name_or_id .. ' has been removed.')
     end
   },
   ["/rbac/credentials"] = {
@@ -323,7 +323,7 @@ return {
       for i = 1, #role_consumers do
         dao_factory.rbac_role_consumers:delete(role_consumers[i]);
       end
-      return helpers.responses.send_HTTP_OK('All role associations of consumer ' .. self.username_or_id .. ' has been removed.')
+      return helpers.responses.send_HTTP_OK(table.getn(role_consumers) .. ' role associations of consumer ' .. self.username_or_id .. ' has been removed.')
     end
   }
 }
