@@ -6,7 +6,7 @@ local RESOURCE_SCHEMA = {
   cache_key = { "api_id", "method", "upstream_path" },
   fields = {
     id = { type = "id", dao_insert_value = true },
-    api_id = { type = "uuid", required = true, foreign = "apis:id" },
+    api_id = { type = "id", required = true },
     method = { type = "string", required = true },
     upstream_path = { type = "string", required = true },
     description = { type = "string", required = true },
@@ -18,34 +18,34 @@ local RESOURCE_SCHEMA = {
 local ROLE_SCHEMA = {
   primary_key = { "id" },
   table = "rbac_roles",
-  cache_key = { "id" },
+  cache_key = { "id", "name" },
   fields = {
     id = { type = "id", dao_insert_value = true },
     name = { type = "string", required = true, unique = true },
     description = { type = "string", required = false },
-    created_at = { type = "timestamp", dao_insert_value = true }
+    created_at = { type = "timestamp", immutable = true, dao_insert_value = true }
   }
 }
 
 local ROLE_RESOURCE_SCHEMA = {
-  primary_key = { "id" },
+  primary_key = { "id", "role_id", "resource_id" },
   table = "rbac_role_resources",
   cache_key = { "role_id" },
   fields = {
     id = { type = "id", dao_insert_value = true },
-    role_id = { type = "string", required = true, foreign = "rbac_roles:id" },
-    resource_id = { type = "string", required = true, foreign = "rbac_resources:id" }
+    role_id = { type = "id", required = true, foreign = "rbac_roles:id" },
+    resource_id = { type = "id", required = true, foreign = "rbac_resources:id" }
   }
 }
 
 local ROLE_CONSUMER_SCHEMA = {
-  primary_key = { "id" },
+  primary_key = { "id", "role_id", "consumer_id" },
   table = "rbac_role_consumers",
-  cache_key = { "consumer_id" },
+  cache_key = { "role_id" },
   fields = {
     id = { type = "id", dao_insert_value = true },
-    role_id = { type = "string", required = true, foreign = "rbac_roles:id" },
-    consumer_id = { type = "string", required = true, foreign = "consumers:id" }
+    role_id = { type = "id", required = true, foreign = "rbac_roles:id" },
+    consumer_id = { type = "id", required = true, foreign = "consumers:id" }
   }
 }
 

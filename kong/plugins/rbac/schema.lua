@@ -57,10 +57,10 @@ return {
       type = "boolean",
       default = false,
     },
-    --run_on_preflight = {
-    --  type = "boolean",
-    --  default = true,
-    --},
+    key_expired = {
+      type = "string",
+      default = "1800",
+    },
     rbac_enabled = {
       type = "boolean",
       default = true
