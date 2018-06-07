@@ -76,7 +76,6 @@ local function load_consumer_resources(consumer_id)
   end
   local resources = {};
   _.forEach(roles, (function(role)
-    ngx.log(ngx.ERR, 'forEach' .. role.id);
     local role_resource_cache_key = dao.rbac_role_resources:cache_key(role.role_id);
     local role_resources, role_resource_err = cache:get(role_resource_cache_key, nil, (function(role_id)
       return dao.rbac_role_resources:find_all({ role_id = role_id });
