@@ -64,6 +64,17 @@ return {
     end,
 
     DELETE = function(self, dao_factory)
+      local filter = {}
+      filter['role_id'] = self.params.id
+      local role_resources, err = dao_factory.rbac_role_resources:find_all(filter)
+      if err then
+        return helpers.yield_error(err)
+      elseif table.getn(role_resources) > 0 then
+        for i = 1, #role_resources do
+          dao_factory.rbac_role_resources:delete(role_resources[i])
+        end
+      end
+
       crud.delete(self.params, dao_factory.rbac_roles)
     end
   },
@@ -107,14 +118,13 @@ return {
         return helpers.responses.send_HTTP_NOT_FOUND()
       end
 
-      -- self.params.role_name_or_id = nil
+      self.params.role_name_or_id = nil
       self.params.role_id = roles[1].id
       self.role = roles[1]
     end,
 
     GET = function(self, dao_factory, helpers)
       local role_ids = {}
-      self.params.role_name_or_id = nil
 
       if self.params.role_ids then
           role_ids = utils.split(self.params.role_ids, ",")
@@ -141,13 +151,12 @@ return {
         return helpers.responses.send_HTTP_OK { total = table.getn(dataList), data = dataList }
       end
 
-      -- crud.paginated_set(self, dao_factory.rbac_role_resources)
       return helpers.responses.send_HTTP_NOT_FOUND("No resources found.")
     end,
 
     POST = function(self, dao_factory, helpers)
-      if not self.params.role_name_or_id then
-        return helpers.responses.send_HTTP_NOT_FOUND("role id is null.")
+      if not self.params.role_id then
+        return helpers.responses.send_HTTP_NOT_FOUND("not found.")
       end
 
       local filter = {}
@@ -168,7 +177,6 @@ return {
 
       if table.getn(resource_ids) ~= nil then
         for i = 1, #resource_ids do
-          self.params.role_name_or_id = nil
           self.params.resource_id = resource_ids[i]
           dao_factory.rbac_role_resources:insert(self.params)
         end
@@ -216,7 +224,7 @@ return {
       crud.post(self.params, dao_factory.rbac_role_consumers)
     end,
 
-    DELETE = function(self, dao_factory)
+    DELETE = function(self, dao_factory, helpers)
       local role_consumers = dao_factory.rbac_role_consumers:find_all(self.params)
       --local primary_keys = {}
       if table.getn(role_consumers) <= 0 then
@@ -268,6 +276,16 @@ return {
       end
       
       return helpers.responses.send_HTTP_NOT_FOUND("set role fail.")
+    end,
+
+    DELETE = function(self, dao_factory, helpers)
+      if table.getn(self.roles) > 0 then
+        for i=1, #self.roles do
+          dao_factory.rbac_role_consumers:delete(self.roles[i])
+        end
+      end
+
+      return helpers.responses.send_HTTP_OK("delete ok")
     end
   },
 
