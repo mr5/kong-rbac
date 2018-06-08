@@ -111,12 +111,16 @@ return {
       local role_resources = dao_factory.rbac_role_resources:find_all(self.params)
       --local primary_keys = {}
       if table.getn(role_resources) <= 0 then
-        return helpers.responses.send_HTTP_NOT_FOUND('Role ' .. self.role_name_or_id .. ' has no resource associations.')
+        return helpers.responses.send_HTTP_NOT_FOUND(
+          'Role ' .. self.role_name_or_id .. ' has no resource associations.'
+        )
       end
       for i = 1, #role_resources do
         dao_factory.rbac_role_resources:delete(role_resources[i]);
       end
-      return helpers.responses.send_HTTP_OK(table.getn(role_resources) .. ' resource associations of role ' .. self.role_name_or_id .. ' has been removed.')
+      return helpers.responses.send_HTTP_OK(
+        table.getn(role_resources) .. ' resource associations of role ' .. self.role_name_or_id .. ' has been removed.'
+      )
     end
   },
   ["/rbac/roles/:role_name_or_id/consumers"] = {
@@ -156,12 +160,16 @@ return {
       local role_consumers = dao_factory.rbac_role_consumers:find_all(self.params)
       --local primary_keys = {}
       if table.getn(role_consumers) <= 0 then
-        return helpers.responses.send_HTTP_NOT_FOUND('Role ' .. self.role_name_or_id .. ' has no consumer associations.')
+        return helpers.responses.send_HTTP_NOT_FOUND(
+          'Role ' .. self.role_name_or_id .. ' has no consumer associations.'
+        )
       end
       for i = 1, #role_consumers do
         dao_factory.rbac_role_consumers:delete(role_consumers[i]);
       end
-      return helpers.responses.send_HTTP_OK(table.getn(role_consumers) .. ' consumer associations of role ' .. self.role_name_or_id .. ' has been removed.')
+      return helpers.responses.send_HTTP_OK(
+        table.getn(role_consumers) .. ' consumer associations of role ' .. self.role_name_or_id .. ' has been removed.'
+      )
     end
   },
   ["/rbac/credentials"] = {
@@ -173,13 +181,16 @@ return {
       if not self.params.consumer_id then
         if self.params.custom_id or self.params.username then
           local filter = {}
-          filter[self.params.custom_id and 'custom_id' or 'username'] = self.params.custom_id and self.params.custom_id or self.params.username
+          local filter_field = self.params.custom_id and 'custom_id' or 'username'
+          filter[filter_field] = self.params.custom_id and self.params.custom_id or self.params.username
           local consumer
           local consumers, err = dao_factory.consumers:find_all(filter)
           if err then
             return helpers.responses.send_HTTP_BAD_REQUEST(err.message)
           elseif next(consumers) == nil then
-            consumer = dao_factory.consumers:insert({ custom_id = self.params.custom_id, username = self.params.username })
+            consumer = dao_factory.consumers:insert(
+              { custom_id = self.params.custom_id, username = self.params.username }
+            )
           else
             consumer = consumers[1]
           end
@@ -323,7 +334,9 @@ return {
       for i = 1, #role_consumers do
         dao_factory.rbac_role_consumers:delete(role_consumers[i]);
       end
-      return helpers.responses.send_HTTP_OK(table.getn(role_consumers) .. ' role associations of consumer ' .. self.username_or_id .. ' has been removed.')
+      return helpers.responses.send_HTTP_OK(
+        table.getn(role_consumers) .. ' role associations of consumer ' .. self.username_or_id .. ' has been removed.'
+      )
     end
   }
 }
