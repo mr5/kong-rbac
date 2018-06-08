@@ -1,6 +1,4 @@
 local responses = require "kong.tools.responses"
-local constants = require "kong.constants"
-local singletons = require "kong.singletons"
 local public_tools = require "kong.tools.public"
 local BasePlugin = require "kong.plugins.base_plugin"
 local access = require "kong.plugins.rbac.access"
@@ -89,7 +87,7 @@ local function do_authentication(conf)
     return false, {status = 401, message = "No API key found in request"}
   end
 
-  return access.execute(key, conf.key_expired)
+  return access.execute(key, conf)
 end
 
 function RBACAuthHandler:access(conf)
@@ -108,15 +106,7 @@ function RBACAuthHandler:access(conf)
 
   local ok, err = do_authentication(conf)
   if not ok then
-    if conf.anonymous ~= "" then
-      -- get anonymous user
-      local err = access.anonymous(conf.anonymous)
-      if err then
-        responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
-      end
-    else
       return responses.send(err.status, err.message)
-    end
   end
 end
 
