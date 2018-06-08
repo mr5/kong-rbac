@@ -113,7 +113,12 @@ local function load_public_resource(visibility)
   return result
 end
 
-function _M.execute(key, expired)
+local function anonymous (anonymous)
+  local consumer_cache_key = singletons.dao.consumers:cache_key(anonymous)
+  return singletons.cache:get(consumer_cache_key, nil, load_consumer, anonymous, true)
+end
+
+function _M.execute(key, conf)
   local cache = singletons.cache
   local dao = singletons.dao
 
@@ -123,9 +128,22 @@ function _M.execute(key, expired)
     return responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
   end
 
-  -- no credential in DB, for this key, it is invalid, HTTP 403
+  -- no credential in DB, for this key, it is invalid, HTTP 401
   if not credential then
-    return false, {status = 403, message = "Invalid authentication credentials"}
+    return false, {status = 401, message = "Invalid authentication credentials"}
+  end
+
+  -- check anonymous 
+  if conf.anonymous ~= "" then
+    if conf.anonymous == credential.consumer_id then
+      local consumer,err = anonymous(conf.anonymous)
+      if err or next(consumer) == nil then
+        return false, {status = 403, message = "Invalid anonymous"}
+      end
+
+      set_consumer(consumer, nil)
+      return true
+    end
   end
 
   -- credential expired.
@@ -171,7 +189,7 @@ function _M.execute(key, expired)
         ngx.req.get_uri_args(),
         ngx.req.read_body())
 
-  
+  ngx.log(ngx.ERR, ok)
   if not ok then
     return false, {status = 403, message = "Forbidden"}
   end
@@ -183,7 +201,7 @@ function _M.execute(key, expired)
   end
 
   set_consumer(consumer, credential)
-  update_key_expired(credential, expired)
+  update_key_expired(credential, conf.key_expired)
   return true
 end
 
@@ -210,16 +228,6 @@ function _M.IgnoreAeecss()
 
     return false, errmsg
   end
-end
-
-function _M.anonymous(anonymous)
-  local consumer_cache_key = singletons.dao.consumers:cache_key(anonymous)
-  local consumer, err = singletons.cache:get(consumer_cache_key, nil, load_consumer, anonymous, true)
-  if err then
-    return responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
-  end
-
-  set_consumer(consumer, nil)
 end
 
 return _M
