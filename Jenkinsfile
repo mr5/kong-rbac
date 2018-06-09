@@ -3,16 +3,11 @@ pipeline {
     dockerfile {
       filename 'Dockerfile'
     }
-
   }
   stages {
     stage('build') {
       steps {
-        sh '''docker build -t $DOCKER_IMAGES .
-
-docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-
-docker push $DOCKER_IMAGES'''
+        echo 'Hello build docker!'
       }
     }
   }
