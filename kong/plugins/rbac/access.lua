@@ -189,7 +189,6 @@ function _M.execute(key, conf)
         ngx.req.get_uri_args(),
         ngx.req.read_body())
 
-  ngx.log(ngx.ERR, ok)
   if not ok then
     return false, {status = 403, message = "Forbidden"}
   end
