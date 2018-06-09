@@ -1,8 +1,9 @@
 pipeline {
   agent {
-    dockerfile {
-      filename 'Dockerfile'
+    docker {
+      image 'hhy5861/kong-rbac'
     }
+
   }
   stages {
     stage('build') {
