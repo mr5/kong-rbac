@@ -3,12 +3,15 @@ pipeline {
     docker {
       image 'hhy5861/kong-rbac'
     }
-
   }
   stages {
     stage('build') {
       steps {
-        echo 'Hello build docker!'
+        sh '''
+          docker login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
+          docker build -t %DOCKER_IMAGES%
+          docker push %DOCKER_IMAGES%
+        '''
       }
     }
   }
