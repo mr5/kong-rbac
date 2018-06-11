@@ -29,7 +29,7 @@ local function do_authentication(conf)
     return false, {status = 500, message = "Invalid plugin configuration"}
   end
 
-  local ok, err = access.IgnoreAeecss()
+  local ok, err = access.ignoreAeecss()
   if ok then
     return ok
   end

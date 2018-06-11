@@ -2,7 +2,7 @@ local utils = require "kong.tools.utils"
 
 local function default_key_names(t)
   if not t.key_names then
-    return { "api_key", "x-token" }
+    return { "api_key", "x-token", "token" }
   end
 end
 

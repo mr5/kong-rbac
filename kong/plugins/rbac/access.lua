@@ -204,7 +204,7 @@ function _M.execute(key, conf)
   return true
 end
 
-function _M.IgnoreAeecss()
+function _M.ignoreAeecss()
   local visibility = "public"
   local resource_key = singletons.dao.rbac_resources:cache_key(visibility)
   local resource, err = singletons.cache:get(resource_key, nil, load_public_resource, visibility)
