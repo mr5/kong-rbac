@@ -8,12 +8,11 @@ pipeline {
         }
         stage('deploy-dev') {
             steps {
-              sh 'docker run -d --name kong \
-              --name some-kong \
+              sh 'docker run -d --name some-kong \
               --restart=always \
+              --link some-kong-postgres:kong-database \
               -e "KONG_DATABASE=postgres" \
-              -e "KONG_PG_HOST=192.168.31.243" \
-              -e "KONG_CASSANDRA_CONTACT_POINTS=192.168.31.243" \
+              -e "KONG_PG_HOST=kong-database" \
               -e "KONG_PROXY_ACCESS_LOG=/dev/stdout" \
               -e "KONG_ADMIN_ACCESS_LOG=/dev/stdout" \
               -e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
