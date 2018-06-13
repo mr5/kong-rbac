@@ -136,7 +136,7 @@ function _M.execute(key, conf)
   -- check anonymous 
   if conf.anonymous ~= "" then
     if conf.anonymous == credential.consumer_id then
-      local consumer,err = anonymous(conf.anonymous)
+      local consumer, err = anonymous(conf.anonymous)
       if err or next(consumer) == nil then
         return false, {status = 403, message = "Invalid anonymous"}
       end
