@@ -5,6 +5,8 @@ local public_tools = require "kong.tools.public"
 local BasePlugin = require "kong.plugins.base_plugin"
 local _ = require "lodash"
 local router = require "router"
+local rbac_constants = require "kong.plugins.rbac.constants"
+local rbac_functions = require "kong.plugins.rbac.functions"
 
 local ngx_set_header = ngx.req.set_header
 local ngx_get_headers = ngx.req.get_headers
@@ -61,32 +63,6 @@ local function load_api_resources(api_id)
   end
   return resources
 end
-local function load_consumer_resources(consumer_id)
-  local cache = singletons.cache
-  local dao = singletons.dao
-  local role_cache_key = dao.rbac_role_consumers:cache_key(consumer_id)
-  local roles, err = cache:get(role_cache_key, nil, (function(id)
-    return dao.rbac_role_consumers:find_all({ consumer_id = id })
-  end), consumer_id)
-  if err then
-    return responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
-  end
-  if table.getn(roles) < 1 then
-    return {}
-  end
-  local resources = {}
-  _.forEach(roles, (function(role)
-    local role_resource_cache_key = dao.rbac_role_resources:cache_key(role.role_id)
-    local role_resources, role_resource_err = cache:get(role_resource_cache_key, nil, (function(role_id)
-      return dao.rbac_role_resources:find_all({ role_id = role_id })
-    end), role.role_id)
-    if role_resource_err then
-      return responses.send_HTTP_INTERNAL_SERVER_ERROR(role_resource_err)
-    end
-    resources = _.union(resources, role_resources)
-  end))
-  return resources
-end
 
 local function set_consumer(consumer, credential)
   ngx_set_header(constants.HEADERS.CONSUMER_ID, consumer.id)
@@ -107,14 +83,14 @@ local function do_rbac(consumer, api)
   if table.getn(api_resources) < 1 then
     return true
   end
-  local consumer_resources = load_consumer_resources(consumer.id)
+  local consumer_resources = rbac_functions.load_consumer_resources(consumer.id)
   local r = router.new()
   local ok = false
   local matched_protected_resource = false
   _.forEach(api_resources, (function(resource)
     r:match(string.upper(resource.method), resource.upstream_path, function()
+      matched_protected_resource = true
       _.forEach(consumer_resources, (function(consumer_resource)
-        matched_protected_resource = true
         ok = consumer_resource.resource_id == resource.id
       end))
     end)
@@ -223,7 +199,7 @@ end
 
 function RBACAuthHandler:access(conf)
   RBACAuthHandler.super.access(self)
-
+  ngx_set_header(rbac_constants.HEADERS.KONG_RBAC, 'ignored')
   -- check if preflight request and whether it should be authenticated
   if not conf.run_on_preflight and get_method() == "OPTIONS" then
     return
@@ -258,9 +234,11 @@ function RBACAuthHandler:access(conf)
       return responses.send_HTTP_INTERNAL_SERVER_ERROR(rbac_err)
     end
     if not ok then
+      ngx_set_header(rbac_constants.HEADERS.KONG_RBAC, 'denied')
       return responses.send_HTTP_FORBIDDEN('Access denied.')
     end
   end
+  ngx_set_header(rbac_constants.HEADERS.KONG_RBAC, 'approved')
 end
 
 return RBACAuthHandler

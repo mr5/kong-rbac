@@ -5,6 +5,8 @@
 ---
 
 local crud = require "kong.api.crud_helpers"
+local rbac_functions = require "kong.plugins.rbac.functions"
+local _ = require 'lodash'
 return {
   ["/rbac/resources"] = {
     GET = function(self, dao_factory)
@@ -104,7 +106,18 @@ return {
       end
       crud.paginated_set(self, dao_factory.rbac_role_resources, load_resource)
     end,
-    POST = function(self, dao_factory)
+    POST = function(self, dao_factory, helpers)
+      if (self.params.resource_ids) then
+        _.forEach(self.params.resource_ids, function(resource_id)
+          dao_factory.rbac_role_resources:insert(
+            { resource_id = resource_id, role_id = self.params.role_id }
+          )
+        end)
+        return helpers.responses.send_HTTP_OK(
+          'Assign ' .. table.getn(self.params.resource_ids)
+            .. ' resources to role ' .. self.role.name .. ' (' .. self.role.id .. ')' .. '.'
+        )
+      end
       crud.post(self.params, dao_factory.rbac_role_resources)
     end,
     DELETE = function(self, dao_factory, helpers)
@@ -293,6 +306,16 @@ return {
 
     POST = function(self, dao_factory)
       crud.post(self.params, dao_factory.rbac_credentials)
+    end
+  },
+  ["/consumers/:username_or_id/rbac-resources/"] = {
+    before = function(self, dao_factory, helpers)
+      crud.find_consumer_by_username_or_id(self, dao_factory, helpers)
+      self.params.consumer_id = self.consumer.id
+    end,
+
+    GET = function(self, dao_factory, helpers)
+      helpers.responses.send_HTTP_OK(rbac_functions.load_consumer_resources(self.consumer.id))
     end
   },
   ["/consumers/:username_or_id/rbac-roles/"] = {
