@@ -90,16 +90,19 @@ local function do_rbac(consumer, api)
   _.forEach(api_resources, (function(resource)
     r:match(string.upper(resource.method), resource.upstream_path, function()
       matched_protected_resource = true
-      _.forEach(consumer_resources, (function(consumer_resource)
+      for i, consumer_resource in ipairs(consumer_resources) do
         ok = consumer_resource.resource_id == resource.id
-      end))
+        if ok then
+          break
+        end
+      end
     end)
   end))
   local uri_to_match = ngx.var.uri
-  if (ngx.ctx.api.strip_uri) then
+  if ngx.ctx.api.strip_uri then
     uri_to_match = string.sub(ngx.var.uri, string.len(ngx.ctx.router_matches.uri) + 1)
   end
-  r:execute(get_method(), uri_to_match)
+  r:execute(string.upper(get_method()), uri_to_match)
   if not matched_protected_resource then
     ok = true
   end
