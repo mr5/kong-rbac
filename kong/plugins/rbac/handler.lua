@@ -95,7 +95,11 @@ local function do_rbac(consumer, api)
       end))
     end)
   end))
-  r:execute(get_method(), string.sub(ngx.var.uri, string.len(ngx.ctx.router_matches.uri) + 1))
+  local uri_to_match = ngx.var.uri
+  if (ngx.ctx.api.strip_uri) then
+    uri_to_match = string.sub(ngx.var.uri, string.len(ngx.ctx.router_matches.uri) + 1)
+  end
+  r:execute(get_method(), uri_to_match)
   if not matched_protected_resource then
     ok = true
   end
