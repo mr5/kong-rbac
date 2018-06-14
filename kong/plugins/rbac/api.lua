@@ -3,7 +3,7 @@
 --- Created by dyson.
 --- DateTime: 2018/4/3 下午5:13
 ---
-
+local cjson = require "cjson"
 local crud = require "kong.api.crud_helpers"
 local rbac_functions = require "kong.plugins.rbac.functions"
 local _ = require 'lodash'
@@ -41,6 +41,26 @@ return {
     DELETE = function(self, dao_factory, helpers)
       crud.delete(self.resource, dao_factory.rbac_resources);
     end
+  },
+  ["/rbac/resources/:resource_id/roles"] = {
+    before = function(self, dao_factory, helpers)
+      local resource, err = dao_factory.rbac_resources:find({ id = self.params.resource_id })
+      if err then
+        return helpers.yield_error(err)
+      elseif resource == nil then
+        return helpers.responses.send_HTTP_NOT_FOUND('Resource ' .. self.params.resource_id .. ' not found.')
+      end
+      self.resource = resource
+    end,
+    GET = function(self, dao_factory, helpers)
+      local load_role = function(row)
+        local pivot = row;
+        row = dao_factory.rbac_roles:find({ id = row.role_id })
+        row.pivot = pivot;
+        return row;
+      end
+      crud.paginated_set(self, dao_factory.rbac_role_resources, load_role)
+    end,
   },
   ["/rbac/roles"] = {
     GET = function(self, dao_factory)
@@ -91,7 +111,7 @@ return {
       elseif next(roles) == nil then
         return helpers.responses.send_HTTP_NOT_FOUND('Role ' .. self.params.role_name_or_id .. ' not found.')
       end
-
+      self.role_name_or_id = self.params.role_name_or_id
       self.params.role_name_or_id = nil
       self.params.role_id = roles[1].id
       self.role = roles[1]
@@ -290,6 +310,26 @@ return {
       crud.delete(self.params, dao_factory.rbac_resources)
     end
   },
+  ["/apis/:api_name_or_id/rbac-resources/sync"] = {
+    before = function(self, dao_factory, helpers)
+      crud.find_api_by_name_or_id(self, dao_factory, helpers)
+      self.params.api_id = self.api.id
+      self.params.api_name_or_id = nil
+    end,
+    POST = function(self, dao_factory, helpers)
+      return helpers.resources.send_HTTP_OK(self.params)
+      --local resources = self.params.responses
+      --if not resources or type(resources) ~= 'table' or table.getn(resources) <= 0 then
+      --  helpers.responses.send_HTTP_BAD_REQUEST('Invalid resources')
+      --  return
+      --end
+      --local db_resources = dao_factory.rbac_resources:find_all({ api_id = self.params.api_id })
+      --return helpers.resources.send_HTTP_OK(db_resources)
+      --for i, resource in ipairs(resources) do
+      --
+      --end
+    end
+  },
   ["/consumers/:username_or_id/rbac-credentials/"] = {
     before = function(self, dao_factory, helpers)
       crud.find_consumer_by_username_or_id(self, dao_factory, helpers)
@@ -315,7 +355,22 @@ return {
     end,
 
     GET = function(self, dao_factory, helpers)
-      helpers.responses.send_HTTP_OK(rbac_functions.load_consumer_resources(self.consumer.id))
+      local resources = rbac_functions.load_consumer_resources(self.consumer.id)
+      local load_resource = function(row)
+        local pivot = row;
+        row = dao_factory.rbac_resources:find({ id = row.resource_id })
+        row.pivot = pivot;
+        return row;
+      end
+      for i, resource in ipairs(resources) do
+        resources[i] = load_resource(resource)
+      end
+      local data = setmetatable(resources, cjson.empty_array_mt)
+
+      helpers.responses.send_HTTP_OK({
+        total = table.getn(data),
+        data = data
+      })
     end
   },
   ["/consumers/:username_or_id/rbac-roles/"] = {
@@ -345,7 +400,18 @@ return {
       end
       crud.paginated_set(self, dao_factory.rbac_role_consumers, load_role)
     end,
-    POST = function(self, dao_factory)
+    POST = function(self, dao_factory, helpers)
+      if (self.params.role_ids) then
+        _.forEach(self.params.role_ids, function(role_id)
+          dao_factory.rbac_role_consumers:insert(
+            { consumer_id = self.params.consumer_id, role_id = role_id }
+          )
+        end)
+        return helpers.responses.send_HTTP_OK(
+          'Assign ' .. table.getn(self.params.role_ids)
+            .. ' roles to consumer ' .. self.consumer.id .. '.'
+        )
+      end
       crud.post(self.params, dao_factory.rbac_role_consumers)
     end,
     DELETE = function(self, dao_factory, helpers)
