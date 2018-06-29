@@ -28,3 +28,6 @@ lint:
 	@luacheck -q .
 test:
 	@$(TEST_CMD) spec/01-unit
+upload:
+	luarocks upload kong-plugin-rbac-*.rockspec
+	rm kong-plugin-rbac-*.src.rock
