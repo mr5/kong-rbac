@@ -1,19 +1,13 @@
-package = "kong-plugin-rbac"  -- TODO: rename, must match the info in the filename of this rockspec!
-                                  -- as a convention; stick to the prefix: `kong-plugin-`
-version = "0.3.1-1"               -- TODO: renumber, must match the info in the filename of this rockspec!
--- The version '0.3.1' is the source code version, the trailing '1' is the version of this rockspec.
--- whenever the source version changes, the rockspec should be reset to 1. The rockspec version is only
--- updated (incremented) when this file changes, but the source remains the same.
+package = "kong-plugin-rbac"
+version = "0.3.2-1"
 
--- TODO: This is the name to set in the Kong configuration `custom_plugins` setting.
--- Here we extract it from the package name.
-local pluginName = package:match("^kong%-plugin%-(.+)$")  -- "rbac"
+local pluginName = 'rbac'
 
 supported_platforms = {"linux", "macosx"}
 source = {
   -- these are initially not required to make it work
   url = "git://github.com/mr5/kong-rbac",
-  tag = "0.3.1"
+  tag = "0.3.2"
 }
 
 description = {
