@@ -87,16 +87,25 @@ local function do_rbac(consumer, api)
   local r = router.new()
   local ok = false
   local matched_protected_resource = false
+  local HTTP_METHODS = { 'get', 'post', 'put', 'patch', 'delete', 'trace', 'connect', 'options', 'head' }
   _.forEach(api_resources, (function(resource)
-    r:match(string.upper(resource.method), resource.upstream_path, function()
-      matched_protected_resource = true
-      for i, consumer_resource in ipairs(consumer_resources) do
-        ok = consumer_resource.resource_id == resource.id
-        if ok then
-          break
+    local methods = {}
+    if (resource.method == 'any' or resource.method == 'all') then
+      methods = HTTP_METHODS
+    else
+      methods = { resource.method }
+    end
+    for i, method in ipairs(methods) do
+      r:match(string.upper(method), resource.upstream_path, function()
+        matched_protected_resource = true
+        for i, consumer_resource in ipairs(consumer_resources) do
+          ok = consumer_resource.resource_id == resource.id
+          if ok then
+            break
+          end
         end
-      end
-    end)
+      end)
+    end
   end))
   local uri_to_match = ngx.var.uri
   if ngx.ctx.api.strip_uri then
