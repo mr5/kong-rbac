@@ -355,6 +355,13 @@ return {
     end,
 
     GET = function(self, dao_factory, helpers)
+      if _.includes(rbac_functions.get_root_consumers(), self.consumer.id) then
+        local data, err = dao_factory.rbac_resources:find_all()
+        return helpers.responses.send_HTTP_OK({
+          total = table.getn(data),
+          data = data
+        })
+      end
       local resources = rbac_functions.load_consumer_resources(self.consumer.id)
       local load_resource = function(row)
         local pivot = row;

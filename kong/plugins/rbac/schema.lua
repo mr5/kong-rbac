@@ -1,4 +1,5 @@
 local utils = require "kong.tools.utils"
+local singletons = require "kong.singletons"
 
 local function default_key_names(t)
   if not t.key_names then
@@ -26,6 +27,15 @@ local function check_user(anonymous)
   return false, "the anonymous user must be empty or a valid uuid"
 end
 
+local function check_consumers_exists(consumer_ids)
+  for i, consumer_id in ipairs(consumer_ids) do
+    local result, err = singletons.dao.consumers:find { id = consumer_id }
+    if not result then
+      return false, 'the root consumer' .. consumer_id .. ' is not exists.'
+    end
+  end
+  return true
+end
 return {
   no_consumer = true,
   fields = {

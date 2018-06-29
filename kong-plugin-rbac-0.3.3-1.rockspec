@@ -1,5 +1,6 @@
 package = "kong-plugin-rbac"
-version = "0.3.2-1"
+tag = "0.3.3"
+version = tag .. "-1"
 
 local pluginName = 'rbac'
 
@@ -7,7 +8,7 @@ supported_platforms = {"linux", "macosx"}
 source = {
   -- these are initially not required to make it work
   url = "git://github.com/mr5/kong-rbac",
-  tag = "0.3.2"
+  tag = tag
 }
 
 description = {

@@ -1,5 +1,6 @@
 local responses = require "kong.tools.responses"
 local singletons = require "kong.singletons"
+local pl_stringx = require "pl.stringx"
 local _ = require "lodash"
 
 local function load_consumer_resources(consumer_id)
@@ -29,6 +30,15 @@ local function load_consumer_resources(consumer_id)
   return resources
 end
 
+local function get_root_consumers()
+  local root_consumers = os.getenv('KONG_RBAC_ROOT_CONSUMERS')
+  if root_consumers then
+    return pl_stringx.split(root_consumers, ',')
+  end
+  return {}
+end
+
 return {
-  load_consumer_resources = load_consumer_resources
+  load_consumer_resources = load_consumer_resources,
+  get_root_consumers = get_root_consumers
 }

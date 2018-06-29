@@ -245,6 +245,10 @@ function RBACAuthHandler:access(conf)
     end
   end
   if conf.rbac_enabled and consumer then
+    if conf.root_consumers and _.includes(rbac_functions.get_root_consumers(), consumer.id) then
+      ngx_set_header(rbac_constants.HEADERS.KONG_RBAC, 'approved')
+      return
+    end
     local ok, rbac_err = do_rbac(consumer, ngx.ctx.api)
     if rbac_err then
       return responses.send_HTTP_INTERNAL_SERVER_ERROR(rbac_err)
